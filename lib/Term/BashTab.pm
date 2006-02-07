@@ -29,7 +29,7 @@ our @ISA = qw(Term::ReadLine);
 #	
 #);
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 # Default global command list
 our @COMMAND = qw();
@@ -42,9 +42,10 @@ our $DIR_SP = $^O eq 'MSWin32' ? q(\\) : q(/);
 
 sub new {
     require Term::ReadLine;
+    my $class = shift | __PACKAGE__;
     my $term = Term::ReadLine->new(@_);
     # re-blessed
-    bless $term, __PACKAGE__;
+    bless $term, $class;
 }
 
 sub __complete(@) {

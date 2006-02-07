@@ -4,3 +4,5 @@ Revision history for Perl extension Term::BashTab.
 	- original version; created by h2xs 1.23 with options
 		-X -n Term::BashTab
 
+0.02  Tue Feb 07 2006
+    - bugfix to new method
