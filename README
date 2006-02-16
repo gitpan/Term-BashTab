@@ -1,4 +1,4 @@
-Term-BashTab version 0.01
+Term-BashTab
 =========================
 
 A simple wrapper of Term::ReadLine, offerring bash-like <TAB> feature.

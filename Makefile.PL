@@ -4,7 +4,7 @@ use ExtUtils::MakeMaker;
 BEGIN {
     require Carp;
     Carp::croak("Currently ONLY support Linux, Sorry") unless $^O eq
-      'linux';
+      'linux' or $^O eq 'MSWin32';
 }
 
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence

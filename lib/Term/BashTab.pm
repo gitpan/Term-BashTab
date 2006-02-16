@@ -29,20 +29,21 @@ our @ISA = qw(Term::ReadLine);
 #	
 #);
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 # Default global command list
 our @COMMAND = qw();
 # Treat first param as ONLY command by default
 our $FIRST_NOT_COMMAND = undef;
-# Directory seperator, Unix family by default
-our $DIR_SP = $^O eq 'MSWin32' ? q(\\) : q(/);
+# Directory separator, Unix family by default
+our $DIR_SEPARATOR = $^O eq 'MSWin32' ? q(\\) 
+  : q(/);
 
 # Preloaded methods go here.
 
 sub new {
     require Term::ReadLine;
-    my $class = shift | __PACKAGE__;
+    my $class = shift || __PACKAGE__;
     my $term = Term::ReadLine->new(@_);
     # re-blessed
     bless $term, $class;
@@ -78,12 +79,17 @@ sub __complete(@) {
                 -e substr($path, 0, length($path)-1);
             # glob all the matched entries if possible
             
-            if($path =~ m#^((?:/?[^/]*)*)/(.*)#o) {
+            my $dirmatch_reg 
+              = $^O eq 'MSWin32' ? qr/^((?i:[a-z]\:\\)?(?:\\?[^\\]+)*)\\(.*)/o 
+                : qr{^((?:/?[^/]+)*)/(.*)}o;
+            
+            #if($path =~ m#^((?:/?[^/]*)*)/(.*)#o) {
+            if ($path =~ $dirmatch_reg) {
                 #print "\n1 = '$1'\n2 = '$2'";
                 # $1 is basedir or null
-                return +() unless -d "$1/";
+                return +() unless -d $1.$DIR_SEPARATOR;
                     
-                opendir DIR, "$1/" or do {
+                opendir DIR, "$1$DIR_SEPARATOR" or do {
                     #warn "opendir: $!";
                     return +();
                 };
@@ -98,7 +104,7 @@ sub __complete(@) {
                         # following match
                         # a small trick here to remove the
                         # tail space for dir
-                        my $file = "$1/".$match[0];
+                        my $file = $1.$DIR_SEPARATOR.$match[0];
                         #print $1, "\n";
                         
                         my $complete;
@@ -110,13 +116,13 @@ sub __complete(@) {
                             $complete = substr($match[0], 
                                                rindex($name, " ")+1);
                         } elsif ($dir and $dir =~ m/ /o) {
-                            $complete = (split / /, $dir)[-1]."/".$match[0];
+                            $complete = (split / /, $dir)[-1].$DIR_SEPARATOR.$match[0];
                         } else {
                             $complete = $file;
                         }
                         if (-d $file) {
-                            return +($complete."/", 
-                                     $complete."/ ");
+                            return +($complete.$DIR_SEPARATOR, 
+                                     $complete.$DIR_SEPARATOR." ");
                         } else {
                             return $complete;
                         }
@@ -164,9 +170,9 @@ sub __complete(@) {
                                                   rindex($name, " ")+1);
                             } elsif ($dir and $dir =~ m/ /o) {
                                 $complete = (split / /, $dir)[-1].
-                                  "/$common";
+                                  $DIR_SEPARATOR."$common";
                             } else {
-                                $complete = "$1/$common";
+                                $complete = $1.$DIR_SEPARATOR.$common;
                             }
                             return +("$complete", 
                                      "$complete ");
@@ -197,8 +203,8 @@ sub __complete(@) {
                         $complete = $file;
                     }
                     if (-d $file) {
-                        return +($complete."/", 
-                                 $complete."/ ");
+                        return +($complete.$DIR_SEPARATOR, 
+                                 $complete.$DIR_SEPARATOR." ");
                     } else {
                         return $complete;
                     }
